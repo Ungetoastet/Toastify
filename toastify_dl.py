@@ -17,8 +17,16 @@ for item in results["items"]:
     track_Name = item["track"]["artists"][0]["name"] + " - " + item["track"]["name"]
     search_res = YoutubeSearch(track_Name, max_results=1).to_json()
     video_id = search_res.split('"')[5]
+    video_name = search_res.split('"')[15]
     print("Downloading song: " + track_Name + " with YT id " + video_id)
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download(['http://youtu.be/'+video_id])
+        dl = ydl.download(['http://youtu.be/'+video_id])
 
-print("Playlist downloading complete!")
+    try:
+        dl_file_name = video_name+"-"+video_id.capitalize()
+        os.rename(r"./"+dl_file_name+".mp3",r"./"+track_Name+".mp3")
+        print("Song has been renamed.")
+    except FileNotFoundError:
+        print("Song couldn't be renamed.")
+
+print("\n\nPlaylist downloading complete!")
