@@ -8,41 +8,10 @@ if platform.system() == "Darwin":
 if platform.system() == "Windows":
     print("!Windows has not been tested and might just crash!")
 
-# Load options
-f = open("./dl_opts.json")
-options = json.load(f)
-os.environ["SPOTIPY_CLIENT_ID"] = options["clientid"]
-os.environ["SPOTIPY_CLIENT_SECRET"] = options["clientsec"]
-ydl_opts = options["ydl_opts"]
-
-# Promp for Playlist URI
-playlist_id = input("Input Spotify Playlist URI: ")
-
-# Login to Spotify API
-sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-
-# Set error detection Variable
+# Set error detection Variables
 flawless = True
-successfull = 0
 
-# Create download folder
-try:
-    os.mkdir("./Downloaded")
-except OSError:
-    print("Creation of the download folder failed. (Maybe the folder already exists)")
-    x = input("Continue? (y/n)")
-    if x != "y":
-        exit()
-
-# Fetch Playlist Tracks from Spotify
-results = sp.user_playlist_tracks("lol", playlist_id, fields='items,uri,name,id,total', market='fr')
-tracknum = len(results["items"])
-print(str(tracknum) + " songs found.")
-
-# Loop over Tracks and Download them
-for item in results["items"]:
-    #Create Trackname
-    track_Name = item["track"]["artists"][0]["name"] + " - " + item["track"]["name"]
+def Download(track_Name):
     #Get video from yt
     try:
         search_resdic = YoutubeSearch(track_Name, max_results=1).to_dict()
@@ -66,15 +35,60 @@ for item in results["items"]:
             #Download the video and convert to mp3
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 ydl.download(['http://youtu.be/'+video_id])
-            successfull += 1
             #Rename and move the file
             try:
                 dl_file_name = video_name+"-"+video_id
-                os.rename(r"./"+dl_file_name+".mp3",r"./Downloaded/"+track_Name+".mp3")
+                os.rename(r"./"+dl_file_name+".mp3",r"./"+playlist_name+"/"+track_Name+".mp3")
                 print("Song has been renamed and moved")
             except FileNotFoundError:
                 print("Song couldn't be renamed.")
                 flawless = False
+
+# Load options
+f = open("./dl_opts.json")
+options = json.load(f)
+os.environ["SPOTIPY_CLIENT_ID"] = options["clientid"]
+os.environ["SPOTIPY_CLIENT_SECRET"] = options["clientsec"]
+ydl_opts = options["ydl_opts"]
+
+# Promp for Playlist URI
+playlist_id = input("Input Spotify Playlist URI: ")
+playlist_name = playlist_id.split(":")[2]
+
+# Login to Spotify API
+sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+
+action = input("redownload/sync/cancel? (r/s/c)")
+
+# Create download folder
+try:
+    os.mkdir("./" + playlist_name)
+except OSError:
+    print("Creation of the download folder failed. Probably the folder already exists.")
+    
+if action == "c":
+    exit()
+
+# Fetch Playlist Tracks from Spotify
+results = sp.user_playlist_tracks("lol", playlist_id, fields='items,uri,name,id,total', market='fr')
+tracknum = len(results["items"])
+print(str(tracknum) + " songs found.")
+
+
+# Loop over Tracks and Download them
+for item in results["items"]:
+    #Create Trackname
+    track_Name = item["track"]["artists"][0]["name"] + " - " + item["track"]["name"]
+    if action == "r":
+        Download(track_Name)
+    if action == "s":
+        try:
+            f = open("./"+playlist_name+"/" + track_Name + ".mp3")
+            print("\nSong found, skipping...")
+        except IOError:
+            Download(track_Name)
+        finally:
+            f.close()
 
 # Present end result
 print("\n\n\n")
@@ -83,5 +97,4 @@ if flawless:
 else:
     print("Playlist download completed with errors. Check Folder for missing songs or renames.")
 
-print("The songs can be found at: " + os.getcwd() + "/Downloaded")
-print("Downloaded " + str(successfull) + " out of " + str(tracknum) + " songs")
+print("The songs can be found at: " + os.getcwd() + "/"+playlist_name)
