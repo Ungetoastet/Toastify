@@ -1,4 +1,6 @@
 # Toastify - Spotify Playlist Downloader
+## WARNING
+Currently doesnt work - waiting fix
 
 ## Description
 A small script that fetches Spotify Playlist using the Spotify API.
