@@ -1,0 +1,4 @@
+spotipy
+youtube_search
+youtube_dl
+ffmpeg

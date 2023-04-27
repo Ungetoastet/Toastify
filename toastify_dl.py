@@ -51,7 +51,7 @@ os.environ["SPOTIPY_CLIENT_ID"] = options["clientid"]
 os.environ["SPOTIPY_CLIENT_SECRET"] = options["clientsec"]
 ydl_opts = options["ydl_opts"]
 
-# Promp for Playlist URI
+# Prompt for Playlist URI
 playlist_id = input("Input Spotify Playlist URI: ")
 playlist_name = playlist_id.split(":")[2]
 

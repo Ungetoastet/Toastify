@@ -2,6 +2,15 @@
 ## WARNING
 Currently doesnt work - waiting fix
 
+## Setup
+Execute:
+```
+pip install -r .\requirements.txt
+```
+to install the necessary python modules.
+
+Go to https://developer.spotify.com/ and get your api client id and api client secret.
+
 ## Description
 A small script that fetches Spotify Playlist using the Spotify API.
 The names of the songs then get redirected to a youtube search engine, downloaded from youtube and converted to an mp3 using ffmpeg.
